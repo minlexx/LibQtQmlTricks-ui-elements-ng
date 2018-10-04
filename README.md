@@ -20,7 +20,7 @@ The `***` can be either `VAR`, `PTR`, `CSTREF`. The three first are simple macro
 
 ### For simple enum class that can be used in C++ and QML
 
-* `QML_ENUM_CLASS` : a macro to declare a `QObject` class that only contains a `Q_ENUM` and can be exposed as is to QML.
+* `QML_ENUM_CLASS` : a macro to declare a "gadget" struct that only contains a `Q_ENUM` and can be exposed as is to QML. It can be used with very similar syntax from both C++ and QML (`<Name>::<Key>` in C++ vs `<Name>.<Key>` in QML/JS).
 
 
 ## Models for C++11 (exposable to QML 2.x)

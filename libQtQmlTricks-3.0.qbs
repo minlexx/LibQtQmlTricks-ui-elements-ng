@@ -43,4 +43,12 @@ Product {
             "gui/helpers/QQuickExtraAnchors.h",
         ]
     }
+    Group {
+        name: "Markdown";
+        files: [
+            "LICENSE.md",
+            "README.md",
+        ]
+
+    }
 }

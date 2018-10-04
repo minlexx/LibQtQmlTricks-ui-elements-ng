@@ -1,0 +1,7 @@
+*.user*
+*.qmlc
+*.jsc
+*.autosave
+*.bak
+*.tmp
+*.old

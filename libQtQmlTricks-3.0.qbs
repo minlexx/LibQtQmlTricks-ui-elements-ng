@@ -1,8 +1,9 @@
 import qbs;
 
 Product {
-    name: "lib-qt-qml-tricks-ng";
+    name: "lib_qt_qml_tricks_ng";
     type: "staticlibrary";
+    cpp.cxxLanguageVersion: "c++11";
     cpp.includePaths: [
         ".",
         "core",
@@ -13,6 +14,26 @@ Product {
         "gui/helpers",
     ]
 
+    Export {
+        cpp.cxxLanguageVersion: "c++11";
+        cpp.includePaths: [
+            ".",
+            "./core",
+            "./core/macros",
+            "./core/models",
+            "./gui",
+            "./gui/containers",
+            "./gui/helpers",
+        ]
+
+        Depends {
+            name: "Qt";
+            submodules: ["core", "gui", "qml", "quick", "svg"];
+        }
+        Depends {
+            name: "cpp";
+        }
+    }
     Depends {
         name: "Qt";
         submodules: ["core", "gui", "qml", "quick", "svg"];
@@ -49,6 +70,5 @@ Product {
             "LICENSE.md",
             "README.md",
         ]
-
     }
 }

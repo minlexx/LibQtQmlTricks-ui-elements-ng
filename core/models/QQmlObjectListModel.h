@@ -83,7 +83,6 @@ public:
         , m_metaObj (ItemType::staticMetaObject)
     {
         static const QSet<QByteArray> roleNamesBlacklist {
-            QByteArrayLiteral ("id"),
             QByteArrayLiteral ("index"),
             QByteArrayLiteral ("class"),
             QByteArrayLiteral ("model"),
@@ -178,7 +177,8 @@ public: // C++ API
     void clear (void) Q_DECL_FINAL {
         if (!m_items.isEmpty ()) {
             beginRemoveRows (noParent (), 0, m_items.count () -1);
-            for (ItemType * item : qAsConst (m_items)) {
+            const QList<ItemType *> list { m_items };
+            for (ItemType * item : list) {
                 if (item) {
                     dereferenceItem (item);
                 }
@@ -222,7 +222,8 @@ public: // C++ API
             beginInsertRows (noParent (), pos, pos + itemList.count () -1);
             m_items.reserve (m_items.count () + itemList.count ());
             m_items.append (itemList);
-            for (ItemType * item : qAsConst (itemList)) {
+            const QList<ItemType *> list { itemList };
+            for (ItemType * item : list) {
                 if (item) {
                     referenceItem (item);
                 }

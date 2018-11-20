@@ -65,7 +65,9 @@ void QQuickAbstractContainerBase::itemChange (ItemChange change, const ItemChang
 }
 
 void QQuickAbstractContainerBase::updatePolish (void) {
-    QQuickItem::updatePolish ();
-    relayout ();
-    emit layoutDone ();
+    if (isVisible ()) {
+        QQuickItem::updatePolish ();
+        relayout ();
+        emit layoutDone ();
+    }
 }

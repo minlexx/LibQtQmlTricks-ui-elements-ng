@@ -7,12 +7,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QDebug>
-#include <QEvent>
-#include <QElapsedTimer>
 #include <QtMath>
-#include <QMetaObject>
-#include <QMetaProperty>
-#include <QMetaMethod>
 #include <QQmlProperty>
 
 QQuickFastObjectListView::QQuickFastObjectListView (QQuickItem * parent)
@@ -21,9 +16,7 @@ QQuickFastObjectListView::QQuickFastObjectListView (QQuickItem * parent)
     , m_behavior    { FREE_MOVE }
     , m_spaceBefore { 0 }
     , m_spaceAfter  { 0 }
-{
-    setFiltersChildMouseEvents (true);
-}
+{ }
 
 QQuickFastObjectListView::~QQuickFastObjectListView (void) {
     qDeleteAll (m_holdersList);
@@ -42,14 +35,14 @@ void QQuickFastObjectListView::componentComplete (void) {
     connect (this, &QQuickFastObjectListView::behaviorChanged,    this, &QQuickFastObjectListView::doMarkDirty);
     connect (this, &QQuickFastObjectListView::spaceBeforeChanged, this, &QQuickFastObjectListView::doMarkDirty);
     connect (this, &QQuickFastObjectListView::spaceAfterChanged,  this, &QQuickFastObjectListView::doMarkDirty);
-    if (parentItem ()) {
+    QQuickItem * item { parentItem () };
+    if (item != Q_NULLPTR) {
         if (QObject * anchors = { property (ANCHORS).value<QObject *> () }) {
-            anchors->setProperty (TOP,   parentItem ()->property (TOP));
-            anchors->setProperty (LEFT,  parentItem ()->property (LEFT));
-            anchors->setProperty (RIGHT, parentItem ()->property (RIGHT));
+            anchors->setProperty (TOP,   item->property (TOP));
+            anchors->setProperty (LEFT,  item->property (LEFT));
+            anchors->setProperty (RIGHT, item->property (RIGHT));
         }
     }
-    QQuickItem * item { parentItem () };
     while (item != Q_NULLPTR) {
         if (item->inherits (FLICKABLE)) {
             m_flickable = item;
@@ -71,7 +64,7 @@ void QQuickFastObjectListView::componentComplete (void) {
     QQuickItem::componentComplete ();
 }
 
-QQmlFastObjectListModelBase * QQuickFastObjectListView::getModel () const {
+QQmlFastObjectListModelBase * QQuickFastObjectListView::getModel (void) const {
     return m_model;
 }
 
@@ -114,8 +107,6 @@ void QQuickFastObjectListView::doResetInstances (void) {
 
 void QQuickFastObjectListView::doPrepareInstances (void) {
     if (m_model != Q_NULLPTR && m_delegate != Q_NULLPTR) {
-        QElapsedTimer bench { };
-        bench.restart ();
         const int nb { m_model->getCount () };
         m_holdersList.reserve (nb);
         for (int idx { 0 }; idx < nb; ++idx) {
@@ -124,7 +115,6 @@ void QQuickFastObjectListView::doPrepareInstances (void) {
             m_holdersList.append (holder);
             doInstantiate (holder);
         }
-        qWarning () << "PREPARED" << nb << "instances in" << bench.elapsed () << "msec";
     }
 }
 
@@ -148,9 +138,9 @@ void QQuickFastObjectListView::doDetachFromModel (void) {
 void QQuickFastObjectListView::doInstantiate (Holder * holder) {
     if (holder != Q_NULLPTR) {
         if (QQmlContext * context = { qmlContext (this) }) {
-            if (QQmlContext * subContext { new QQmlContext { context, this } }) {
+            if (QQmlContext * subContext = { new QQmlContext { context, this } }) {
                 subContext->setContextProperty (MODEL_ITEM, holder->modelItem);
-                if (QObject * tmp { m_delegate->create (subContext) }) {
+                if (QObject * tmp = { m_delegate->create (subContext) }) {
                     if (QQuickItem * instance = { qobject_cast<QQuickItem *> (tmp) }) {
                         instance->setParent     (this);
                         instance->setParentItem (this);
@@ -224,12 +214,10 @@ void QQuickFastObjectListView::updatePolish (void) {
         const int contentY  { qRound (m_flickable->property (CONTENT_Y).toReal ()) };
         int endY { m_spaceBefore };
         QQuickItem * currentDelegate { Q_NULLPTR };
-        for (Holder * holder : m_holdersList) {
+        for (Holder * holder : qAsConst (m_holdersList)) {
             if (holder->delegateInstance != Q_NULLPTR) {
                 holder->delegateInstance->setY (endY);
-                holder->delegateInstance->setWidth (viewportW);
-                holder->delegateInstance->setVisible (!(((-contentY + holder->delegateInstance->y () + holder->delegateInstance->height ()) < (viewportH * -1)) ||
-                                                        ((-contentY + holder->delegateInstance->y ()) > (viewportH * 2))));
+                holder->delegateInstance->setVisible (!(((endY + holder->delegateInstance->height ()) < (contentY - viewportH)) || (endY > (contentY + viewportH * 2))));
                 endY += qCeil (holder->delegateInstance->height ());
                 if (m_current == holder->modelItem) {
                     currentDelegate = holder->delegateInstance;
@@ -250,12 +238,7 @@ void QQuickFastObjectListView::updatePolish (void) {
             }
             case KEEP_AT_BOTTOM: {
                 if (currentDelegate) {
-                    if (currentDelegate->height () < roomH) {
-                        doChangePositionY (qFloor (currentDelegate->y () + currentDelegate->height () - viewportH + m_spaceAfter));
-                    }
-                    else {
-                        doChangePositionY (qCeil (currentDelegate->y ()) - m_spaceBefore);
-                    }
+                    doChangePositionY (qFloor (currentDelegate->y () + currentDelegate->height () - viewportH) + m_spaceAfter);
                 }
                 break;
             }

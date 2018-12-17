@@ -14,10 +14,11 @@ public:
     explicit QQmlFastObjectListModelBase (QObject * parent = Q_NULLPTR) : QObject { parent } { }
     virtual ~QQmlFastObjectListModelBase (void) { }
 
-    virtual int       getCount     (void)      const { return 0; }
-    virtual QObject * getFirstItem (void)      const { return Q_NULLPTR; }
-    virtual QObject * getLastItem  (void)      const { return Q_NULLPTR; }
-    virtual QObject * getItem      (const int) const { return Q_NULLPTR; }
+    Q_INVOKABLE virtual int       getCount     (void)      const { return 0; }
+    Q_INVOKABLE virtual bool      getContains  (QObject *) const { return false; }
+    Q_INVOKABLE virtual QObject * getFirstItem (void)      const { return Q_NULLPTR; }
+    Q_INVOKABLE virtual QObject * getLastItem  (void)      const { return Q_NULLPTR; }
+    Q_INVOKABLE virtual QObject * getItem      (const int) const { return Q_NULLPTR; }
 
 signals:
     void countChanged (void);
@@ -149,6 +150,9 @@ public:
 protected: // API for QQuickFastObjectListView only
     int getCount (void) const Q_DECL_FINAL {
         return count ();
+    }
+    bool getContains (QObject * item) const Q_DECL_FINAL {
+        return contains (qobject_cast<T *> (item));
     }
     QObject * getItem (const int idx) const Q_DECL_FINAL {
         return getAt (idx);

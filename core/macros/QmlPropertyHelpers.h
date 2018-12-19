@@ -77,8 +77,8 @@
     QML_CONSTANT_PROPERTY_IMPL(NAME, TYPE *, TYPE *, TYPE *)
 
 #if QT_VERSION < 0x050700
-template<typename T> const QList<T *> & qAsConst (const QList<T *> & list) {
-    return list;
+template<typename T> const T & qAsConst (const T & arg) {
+    return arg;
 }
 #endif
 
